@@ -179,6 +179,7 @@ android_library {
         "LowLightDreamLib",
         "motion_tool_lib",
         "faceunlock_framework",
+	"googlebattery-lib",
     ],
     manifest: "AndroidManifest.xml",
 
