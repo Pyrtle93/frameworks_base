@@ -857,6 +857,7 @@ public class ApplicationPackageManager extends PackageManager {
                 !Arrays.asList(p21Codenames).contains(SystemProperties.get("ro.product.device"))) {
             return false;
         }
+        if (Arrays.asList(featuresPixel).contains(name)) return true;
         return mHasSystemFeatureCache.query(new HasSystemFeatureQuery(name, version));
     }
 
