@@ -681,6 +681,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private InputFilter mInputFilter;
     private int mTorchActionMode;
+    private boolean mUnhandledTorchPower = false;
 
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
     private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
@@ -1060,6 +1061,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!interactive) {
                 if (mTorchActionMode == 0) {
                     wakeUpFromPowerKey(event.getDownTime());
+                } else {
+                    mUnhandledTorchPower = true;
                 }
             }
         } else {
@@ -1107,6 +1110,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         final boolean interactive = Display.isOnState(mDefaultDisplay.getState());
+        final boolean torchActionEnabled = mTorchActionMode != 0;
 
         Slog.d(TAG, "powerPress: eventTime=" + eventTime + " interactive=" + interactive
                 + " count=" + count + " beganFromNonInteractive=" + beganFromNonInteractive
@@ -1118,10 +1122,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
         } else if (count > 3 && count <= getMaxMultiPressPowerCount()) {
             Slog.d(TAG, "No behavior defined for power press count " + count);
-        } else if (count == 1 && interactive) {
-            if (beganFromNonInteractive) {
-                // The screen off case, where we might want to start dreaming on power button press.
-                attemptToDreamFromShortPowerButtonPress(false, () -> {});
+        } else if (count == 1 && interactive && !beganFromNonInteractive) {
+            if (mUnhandledTorchPower && beganFromNonInteractive && torchActionEnabled) {
+                wakeUpFromPowerKey(eventTime);
                 return;
             }
             if (mSideFpsEventHandler.shouldConsumeSinglePress(eventTime)) {
@@ -1179,7 +1182,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 }
             }
-        } else if (mTorchActionMode != 0 && beganFromNonInteractive) {
+        }
+        if (mUnhandledTorchPower && torchActionEnabled && beganFromNonInteractive) {
             wakeUpFromPowerKey(eventTime);
         }
     }
