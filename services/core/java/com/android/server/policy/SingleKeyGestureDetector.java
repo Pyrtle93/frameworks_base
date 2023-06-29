@@ -58,9 +58,9 @@ public final class SingleKeyGestureDetector {
     private final Handler mHandler;
     private long mLastDownTime = 0;
 
-    private static final int TORCH_DOUBLE_TAP_DELAY = 170;
+    static final int TORCH_DOUBLE_TAP_DELAY = 170;
 
-    private final Context mContext;
+    private Context mContext;
 
     /** Supported gesture flags */
     public static final int KEY_LONGPRESS = 1 << 1;
@@ -332,10 +332,10 @@ public final class SingleKeyGestureDetector {
                         mKeyPressCounter, mActiveRule);
                 msg.setAsynchronous(true);
                 mHandler.sendMessageDelayed(msg, Settings.System.getIntForUser(
-                        mContext.getContentResolver(),
-                        Settings.System.TORCH_POWER_BUTTON_GESTURE,
-                        0, UserHandle.USER_CURRENT) == 1 ? TORCH_DOUBLE_TAP_DELAY
-                        : MULTI_PRESS_TIMEOUT);
+                    mContext.getContentResolver(),
+                    Settings.System.TORCH_POWER_BUTTON_GESTURE,
+                    0, UserHandle.USER_CURRENT) == 1 ? TORCH_DOUBLE_TAP_DELAY
+                    : MULTI_PRESS_TIMEOUT);
             }
             return true;
         }
